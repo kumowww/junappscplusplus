@@ -1,91 +1,58 @@
-#pragma once
-#include <cstddef>
+#ifndef MYVECTOR_IMPROVED_H
+#define MYVECTOR_IMPROVED_H
+
 #include <stdexcept>
-#include <algorithm>
+#include <memory>
 
 template <typename T>
 class MyVector {
 private:
-    T* data_;
-    size_t size_;
-    size_t capacity_;
-
-    void reallocate(size_t newCapacity) {
-        T* newData = new T[newCapacity];
-        for (size_t i = 0; i < size_; ++i)
-            newData[i] = std::move(data_[i]);
-
-        delete[] data_;
-        data_ = newData;
-        capacity_ = newCapacity;
-    }
+    T* data;
+    size_t capacity;
+    size_t size;
 
 public:
-    MyVector() : data_(nullptr), size_(0), capacity_(0) {}
+    MyVector() : data(nullptr), capacity(0), size(0) {}
 
-    MyVector(const MyVector& other)
-        : size_(other.size_), capacity_(other.capacity_) {
-        data_ = new T[capacity_];
-        for (size_t i = 0; i < size_; ++i)
-            data_[i] = other.data_[i];
+    // destructor
+    ~MyVector() { delete[] data; }
+
+    // method to reserve memory
+    void reserve(size_t new_capacity) {
+        if (new_capacity > capacity) {
+            T* new_data = new T[new_capacity];
+            for (size_t i = 0; i < size; ++i) {
+                new_data[i] = std::move(data[i]);
+            }
+            delete[] data;
+            data = new_data;
+            capacity = new_capacity;
+        }
     }
 
-    MyVector(MyVector&& other) noexcept
-        : data_(other.data_), size_(other.size_), capacity_(other.capacity_) {
-        other.data_ = nullptr;
-        other.size_ = other.capacity_ = 0;
-    }
-
-    MyVector& operator=(const MyVector& other) {
-        if (this == &other) return *this;
-
-        delete[] data_;
-        size_ = other.size_;
-        capacity_ = other.capacity_;
-        data_ = new T[capacity_];
-
-        for (size_t i = 0; i < size_; ++i)
-            data_[i] = other.data_[i];
-
-        return *this;
-    }
-
-    MyVector& operator=(MyVector&& other) noexcept {
-        delete[] data_;
-        data_ = other.data_;
-        size_ = other.size_;
-        capacity_ = other.capacity_;
-
-        other.data_ = nullptr;
-        other.size_ = other.capacity_ = 0;
-        return *this;
-    }
-
-    ~MyVector() {
-        delete[] data_;
-    }
-
+    // method to add elements
     void push_back(const T& value) {
-        if (size_ == capacity_)
-            reallocate(capacity_ == 0 ? 1 : capacity_ * 2);
-
-        data_[size_++] = value;
+        if (size == capacity) {
+            reserve(capacity == 0 ? 1 : capacity * 2);
+        }
+        data[size++] = value;
     }
 
-    void pop_back() {
-        if (size_ == 0)
-            throw std::out_of_range("Vector is empty");
-        --size_;
+    void clear() {
+        size = 0;
     }
 
-    T& operator[](size_t index) {
-        return data_[index];
+    // at method with exception throwing
+    T& at(size_t index) {
+        if (index >= size) {
+            throw std::out_of_range("Index out of bounds");
+        }
+        return data[index];
     }
 
-    const T& operator[](size_t index) const {
-        return data_[index];
-    }
+    // get the current size
+    size_t get_size() const { return size; }
 
-    size_t size() const { return size_; }
-    size_t capacity() const { return capacity_; }
+    // get the capacity
+    size_t get_capacity() const { return capacity; }
 };

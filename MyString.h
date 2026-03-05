@@ -1,62 +1,90 @@
-#pragma once
+#ifndef MYSTRING_IMPROVED_H
+#define MYSTRING_IMPROVED_H
+
 #include <cstring>
 #include <iostream>
 
 class MyString {
 private:
-    char* data_;
-    size_t length_;
+    char* str;
+    size_t length;
 
 public:
-    MyString() : data_(new char[1]{'\0'}), length_(0) {}
-
-    MyString(const char* str) {
-        length_ = std::strlen(str);
-        data_ = new char[length_ + 1];
-        std::strcpy(data_, str);
+    MyString(const char* s = "") {
+        if (s == nullptr) {
+            str = new char[1];
+            str[0] = '\0';
+        } else {
+            length = strlen(s);
+            str = new char[length + 1];
+            strcpy(str, s);
+        }
     }
 
-    MyString(const MyString& other) {
-        length_ = other.length_;
-        data_ = new char[length_ + 1];
-        std::strcpy(data_, other.data_);
-    }
-    MyString(MyString&& other) noexcept
-        : data_(other.data_), length_(other.length_) {
-        other.data_ = nullptr;
-        other.length_ = 0;
-    }
-    MyString& operator=(const MyString& other) {
-        if (this == &other) return *this;
-
-        delete[] data_;
-        length_ = other.length_;
-        data_ = new char[length_ + 1];
-        std::strcpy(data_, other.data_);
-        return *this;
-    }
-    MyString& operator=(MyString&& other) noexcept {
-        delete[] data_;
-        data_ = other.data_;
-        length_ = other.length_;
-
-        other.data_ = nullptr;
-        other.length_ = 0;
-        return *this;
-    }
     ~MyString() {
-        delete[] data_;
+        delete[] str;
     }
 
-    size_t length() const { return length_; }
-    const char* c_str() const { return data_; }
-
-    char& operator[](size_t index) {
-        return data_[index];
+    // copy from constructor xd
+    MyString(const MyString& other) {
+        length = other.length;
+        str = new char[length + 1];
+        strcpy(str, other.str);
     }
 
-    friend std::ostream& operator<<(std::ostream& os, const MyString& str) {
-        os << str.data_;
-        return os;
+    // overload the assignment operator
+    MyString& operator=(const MyString& other) {
+        if (this != &other) {
+            delete[] str;
+            length = other.length;
+            str = new char[length + 1];
+            strcpy(str, other.str);
+        }
+        return *this;
+    }
+
+    // overload the comparison operators
+    bool operator==(const MyString& other) const {
+        return strcmp(str, other.str) == 0;
+    }
+
+    bool operator!=(const MyString& other) const {
+        return !(*this == other);
+    }
+
+    // overload the concatenation operator
+    MyString operator+(const MyString& other) const {
+        MyString result;
+        result.length = length + other.length;
+        result.str = new char[result.length + 1];
+        strcpy(result.str, str);
+        strcat(result.str, other.str);
+        return result;
+    }
+
+    // append method 0_0
+    void append(const MyString& other) {
+        size_t new_length = length + other.length;
+        char* new_str = new char[new_length + 1];
+        strcpy(new_str, str);
+        strcat(new_str, other.str);
+        delete[] str;
+        str = new_str;
+        length = new_length;
+    }
+
+    // substr method
+    MyString substr(size_t start, size_t len) const {
+        if (start >= length) return MyString();
+        if (len > length - start) len = length - start;
+        char* sub_str = new char[len + 1];
+        strncpy(sub_str, str + start, len);
+        sub_str[len] = '\0';
+        return MyString(sub_str);
+    }
+
+    // output method for easy printing
+    friend std::ostream& operator<<(std::ostream& os, const MyString& obj) {
+        return os << obj.str;
     }
 };
