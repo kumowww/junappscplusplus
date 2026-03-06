@@ -25,14 +25,12 @@ public:
         delete[] str;
     }
 
-    // copy from constructor xd
     MyString(const MyString& other) {
         length = other.length;
         str = new char[length + 1];
         strcpy(str, other.str);
     }
 
-    // overload the assignment operator
     MyString& operator=(const MyString& other) {
         if (this != &other) {
             delete[] str;
@@ -43,7 +41,6 @@ public:
         return *this;
     }
 
-    // overload the comparison operators
     bool operator==(const MyString& other) const {
         return strcmp(str, other.str) == 0;
     }
@@ -52,7 +49,6 @@ public:
         return !(*this == other);
     }
 
-    // overload the concatenation operator
     MyString operator+(const MyString& other) const {
         MyString result;
         result.length = length + other.length;
@@ -62,7 +58,7 @@ public:
         return result;
     }
 
-    // append method 0_0
+    
     void append(const MyString& other) {
         size_t new_length = length + other.length;
         char* new_str = new char[new_length + 1];
@@ -73,7 +69,6 @@ public:
         length = new_length;
     }
 
-    // substr method
     MyString substr(size_t start, size_t len) const {
         if (start >= length) return MyString();
         if (len > length - start) len = length - start;
@@ -83,7 +78,6 @@ public:
         return MyString(sub_str);
     }
 
-    // output method for easy printing
     friend std::ostream& operator<<(std::ostream& os, const MyString& obj) {
         return os << obj.str;
     }
